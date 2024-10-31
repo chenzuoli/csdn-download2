@@ -43,7 +43,6 @@ E:\VisualStudioProjects\csdn-download2\csdn-download\bin\Debug\System.ValueTuple
 E:\VisualStudioProjects\csdn-download2\csdn-download\bin\Debug\WebDriver.xml
 E:\VisualStudioProjects\csdn-download2\csdn-download\bin\Debug\WebDriver.Support.xml
 E:\VisualStudioProjects\csdn-download2\csdn-download\obj\Debug\csdn-download.csproj.AssemblyReference.cache
-E:\VisualStudioProjects\csdn-download2\csdn-download\obj\Debug\csdn_download.Form1.resources
 E:\VisualStudioProjects\csdn-download2\csdn-download\obj\Debug\csdn_download.Properties.Resources.resources
 E:\VisualStudioProjects\csdn-download2\csdn-download\obj\Debug\WinFormWaitDialog.WaitDialog.resources
 E:\VisualStudioProjects\csdn-download2\csdn-download\obj\Debug\csdn-download.csproj.GenerateResource.cache
@@ -55,3 +54,4 @@ E:\VisualStudioProjects\csdn-download2\csdn-download\bin\Debug\HtmlAgilityPack.d
 E:\VisualStudioProjects\csdn-download2\csdn-download\bin\Debug\ReverseMarkdown.dll
 E:\VisualStudioProjects\csdn-download2\csdn-download\bin\Debug\HtmlAgilityPack.pdb
 E:\VisualStudioProjects\csdn-download2\csdn-download\bin\Debug\HtmlAgilityPack.xml
+E:\VisualStudioProjects\csdn-download2\csdn-download\obj\Debug\csdn_download.csdn_export.resources

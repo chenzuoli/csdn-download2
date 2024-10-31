@@ -20,9 +20,9 @@ using ReverseMarkdown;
 
 namespace csdn_download
 {
-    public partial class Form1 : Form
+    public partial class csdn_export : Form
     {
-        public Form1()
+        public csdn_export()
         {
             InitializeComponent();
         }
@@ -192,12 +192,21 @@ namespace csdn_download
             }
         }
 
+        private string parseTitle(string title)
+        {
+            title = title.Trim();
+            title = title.Replace(" ", "_").Replace("\\", "_").Replace("/", "_").Replace(":", "_").Replace("*", "_").Replace("?", "_");
+            title = title.Replace("'", "_").Replace("\"", "_").Replace(">", "_").Replace("<", "_").Replace("|", "_").Replace("\0", "_");
+            title = title.Replace("\r", "_").Replace("\n", "_").Replace("[", "_").Replace("]", "_");
+            return title;
+        }
 
         private void write_markdown(string selectedFolder, Dictionary<string, string>  article_info )
         {
             // 写markdown文件
             string content = article_info["content"];
             string title = article_info["title"].Replace("-CSDN博客", "");
+            title = parseTitle(title);
             File.WriteAllText(Path.Combine(selectedFolder, title + ".md"),  content);
         }
 
@@ -608,6 +617,11 @@ namespace csdn_download
                 messageBoxForm.Close();
             };
             timer.Start();
+        }
+
+        private void CSDN文章导出_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
