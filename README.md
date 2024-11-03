@@ -38,4 +38,8 @@
 
 
 官网地址：[www.lezhifu.cc](https://lezhifu.cc)
-公众号：![lezhifu](image.png)
+
+公众号：
+<div style="text-align: center;">  
+    <img src="image.png" alt="乐知付" style="width: 50%;">  
+</div>
