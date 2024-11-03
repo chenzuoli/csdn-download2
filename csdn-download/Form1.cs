@@ -17,6 +17,8 @@ using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
 using HtmlAgilityPack;
 using ReverseMarkdown;
+using OpenQA.Selenium.Chrome;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
 
 namespace csdn_download
 {
@@ -35,6 +37,29 @@ namespace csdn_download
 
         private void exportBtn_Click(object sender, EventArgs e)
         {
+
+            // 获取选择的博客链接
+            var ifSeleted = false;
+            var selectedUrls = new List<string>();
+            for (int i = 0; i < dataGridView1.Rows.Count; i++)
+            {
+                Console.WriteLine(dataGridView1.Rows[i].ToString());
+                if (Convert.ToBoolean(dataGridView1.Rows[i].Cells[0].Value) == true)
+                {
+                    ifSeleted = true;
+                    var url = dataGridView1.Rows[i].Cells[2].Value;
+                    if (url != null)
+                    {
+                        selectedUrls.Add(url.ToString());
+                    }
+                };
+            }
+            if (!ifSeleted)
+            {
+                MessageBox.Show("未选择任务博客文章，请选择后再导出。");
+                return;
+            }
+
             // 选择导出文件夹
             FolderBrowserDialog folderDialog = new FolderBrowserDialog();
             folderDialog.Description = "请选择一个文件夹保存博客文章";
@@ -44,36 +69,16 @@ namespace csdn_download
             {
                 selectedFolder = folderDialog.SelectedPath;
                 Console.WriteLine("选择的文件夹为：" + selectedFolder);
-            } else
+            }
+            else
             {
                 MessageBox.Show("请选择文件夹保存博客文章");
                 return;
             }
 
-            // 获取选择的博客链接
-            var ifSeleted = false;
-            var selectedUrls = new List<string>();
-            for(int i = 0;i < dataGridView1.Rows.Count;i++)
-            {
-                Console.WriteLine(dataGridView1.Rows[i].ToString());
-                if (Convert.ToBoolean(dataGridView1.Rows[i].Cells[0].Value)  == true) {
-                    ifSeleted = true;
-                    var url = dataGridView1.Rows[i].Cells[2].Value;
-                    if (url != null)
-                    {
-                        selectedUrls.Add(url.ToString());
-                    }
-                };
-            }
-            if (!ifSeleted) {
-                MessageBox.Show("未选择任务博客文章，请选择后再导出。");
-            }
-
             // 爬取文章并导出
             get_article_contents(selectedFolder, selectedUrls);
 
-            // 提示导出成功
-            ShowMessageBoxWithTimeout("导出成功！", 3000);
         }
 
         private async void get_articles(string selectedFolder, List<string> article_urls)
@@ -93,7 +98,7 @@ namespace csdn_download
             {
                 using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(30)))
                 {
-                    for(int i=0; i < article_urls.Count; i++)
+                    for (int i = 0; i < article_urls.Count; i++)
                     {
                         string article_url = article_urls[i];
                         string get_article_content_url = "http://localhost:5000/csdn/get_article?csdn_url=" + article_url;
@@ -133,7 +138,7 @@ namespace csdn_download
             }
         }
 
-        private async void get_article_contents(string selectedFolder, List<string> article_urls)
+        private async Task get_article_contents(string selectedFolder, List<string> article_urls)
         {
             var waitDialog = new WaitDialog((IProgress<string> progress) =>
             {
@@ -141,55 +146,45 @@ namespace csdn_download
             });
             waitDialog.Show();
 
-            HttpClient client = new HttpClient();
-            client.Timeout = TimeSpan.FromMinutes(35);
-
-            // http请求超时时间10min
-            var watch = Stopwatch.StartNew();
-            try
+            // 等待异步请求文章内容完成
+            await Task.Run(() =>
             {
-                using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(30)))
-                {
-                    for (int i = 0; i < article_urls.Count; i++)
-                    {
-                        string article_url = article_urls[i];
-                        var article_info = RequestArticleContent(article_url);
-                        write_markdown(selectedFolder, article_info);
-                        Thread.Sleep(1000);
-                        //HttpResponseMessage response = await client.GetAsync(article_url, tokenSource.Token);
-                        //if (response.IsSuccessStatusCode)
-                        //{
-                        //    string content = await response.Content.ReadAsStringAsync();
-                        //    Console.WriteLine(content);
+                HttpClient client = new HttpClient();
+                client.Timeout = TimeSpan.FromMinutes(35);
 
-                        //    // 导出到文件夹中
-                        //    Dictionary<string, string> article_info = JsonConvert.DeserializeObject<Dictionary<string, string>>(content);
-                        //    write_markdown(selectedFolder, article_info);
-                        //    Thread.Sleep(1000); // sleep 1s
-                        //}
-                        //else
-                        //{
-                        //    Console.WriteLine($"Error: {response.StatusCode}, csdn download url: {article_url}");
-                        //}
+                // http请求超时时间10min
+                var watch = Stopwatch.StartNew();
+                try
+                {
+                    using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(30)))
+                    {
+                        for (int i = 0; i < article_urls.Count; i++)
+                        {
+                            string article_url = article_urls[i];
+                            var article_info = RequestArticleContent(article_url);
+                            write_markdown(selectedFolder, article_info);
+                            Thread.Sleep(1000);
+                        }
                     }
                 }
-            }
-            catch (TaskCanceledException ex)
-            {
-                MessageBox.Show($"{watch.Elapsed} s 任务超时");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"请求错误：{ex.ToString()}");
-            }
-            finally
-            {
-                if (waitDialog != null)
+                catch (TaskCanceledException ex)
                 {
-                    // 关闭【加载中】进度条
-                    waitDialog.Close();
+                    MessageBox.Show($"{watch.Elapsed} s 任务超时");
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"请求错误：{ex.ToString()}");
+                }
+            });
+
+            if (waitDialog != null)
+            {
+                // 关闭【加载中】进度条
+                waitDialog.Close();
             }
+
+            // 提示导出成功
+            ShowMessageBoxWithTimeout("导出成功！", 3000);
         }
 
         private string parseTitle(string title)
@@ -201,16 +196,16 @@ namespace csdn_download
             return title;
         }
 
-        private void write_markdown(string selectedFolder, Dictionary<string, string>  article_info )
+        private void write_markdown(string selectedFolder, Dictionary<string, string> article_info)
         {
             // 写markdown文件
             string content = article_info["content"];
             string title = article_info["title"].Replace("-CSDN博客", "");
             title = parseTitle(title);
-            File.WriteAllText(Path.Combine(selectedFolder, title + ".md"),  content);
+            File.WriteAllText(Path.Combine(selectedFolder, title + ".md"), content);
         }
 
-        private  void viewBlogBtn_Click(object sender, EventArgs e)
+        private void viewBlogBtn_Click(object sender, EventArgs e)
         {
             // 加载中
             var waitDialog = new WaitDialog((IProgress<string> progress) =>
@@ -220,24 +215,24 @@ namespace csdn_download
             waitDialog.Show();
             GetCsdnData(waitDialog);
             //load_articles(waitDialog);
-            //waitDialog.Close();
-            waitDialog.Close();
         }
 
         private async void load_articles(WaitDialog waitDialog)
         {
             string user_id = textBox1.Text;
-            if (string.IsNullOrEmpty(user_id)) {
+            if (string.IsNullOrEmpty(user_id))
+            {
                 waitDialog.Close();
                 MessageBox.Show("请输入用户ID");
-                return; }
+                return;
+            }
 
             string csdn_url = "http://localhost:5000/csdn/get_articles/" + user_id;
             HttpClient client = new HttpClient();
             client.Timeout = TimeSpan.FromMinutes(35);
-            
+
             // http请求超时时间10min
-            var watch= Stopwatch.StartNew();
+            var watch = Stopwatch.StartNew();
             try
             {
                 using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(30)))
@@ -285,7 +280,7 @@ namespace csdn_download
                 progress.Report($"csdn downloading...");
                 Thread.Sleep(10000);
             }
-         }
+        }
 
         private void fillGridView(List<Dictionary<string, string>> data)
         {
@@ -344,7 +339,8 @@ namespace csdn_download
                 if (Convert.ToBoolean(dataGridView1.Rows[i].Cells[0].Value) == false)
                 {
                     dataGridView1.Rows[i].Cells[0].Value = true;
-                } else
+                }
+                else
                     continue;
             }
         }
@@ -366,10 +362,12 @@ namespace csdn_download
         {
             for (int i = 0; i < dataGridView1.Rows.Count; i++)
             {
-                if (Convert.ToBoolean(dataGridView1.Rows[i].Cells[0].Value) ==  false)
+                if (Convert.ToBoolean(dataGridView1.Rows[i].Cells[0].Value) == false)
                 {
-                    dataGridView1.Rows[i].Cells[0].Value=true;
-                } else {
+                    dataGridView1.Rows[i].Cells[0].Value = true;
+                }
+                else
+                {
                     dataGridView1.Rows[i].Cells[0].Value = false;
                 }
             }
@@ -379,7 +377,7 @@ namespace csdn_download
         /// 获取所有文章链接
         /// </summary>
         /// <returns></returns>
-        public async void GetCsdnData(WaitDialog waitDialog)
+        public async Task GetCsdnData(WaitDialog waitDialog)
         {
             string user_id = textBox1.Text;
             if (string.IsNullOrEmpty(user_id))
@@ -389,108 +387,117 @@ namespace csdn_download
                 return;
             }
 
-            string csdn_url = "https://blog.csdn.net/" + user_id;
-            HttpClient client = new HttpClient();
-            client.Timeout = TimeSpan.FromMinutes(35);
+            var article_infos = new List<Dictionary<string, string>>();
 
-            // http请求超时时间10min
-            var watch = Stopwatch.StartNew();
-            try
+            // 在后台线程上运行 Selenium 操作  ，让waitDialog处于加载中状态
+            await Task.Run(() =>
             {
-                using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(30)))
+                string csdn_url = "https://blog.csdn.net/" + user_id;
+                HttpClient client = new HttpClient();
+                client.Timeout = TimeSpan.FromMinutes(35);
+
+                // http请求超时时间10min
+                var watch = Stopwatch.StartNew();
+                try
                 {
-                    var chrome_options = new OpenQA.Selenium.Chrome.ChromeOptions();
-                    //chrome_options.AddArgument("--headless");
-                    chrome_options.AddArgument("--disable-gpu");
-                    chrome_options.AddArgument("--start-maximized");  // 最大化窗口
-                    IWebDriver driver = new OpenQA.Selenium.Chrome.ChromeDriver(chrome_options);
-                    driver.Navigate().GoToUrl(csdn_url);
-                    // 加载页面
-
-                    var timeouts = driver.Manage().Timeouts();
-
-                    // 等待页面body标签加载完成
-                    var wait = new WebDriverWait(driver, new TimeSpan(0, 0, 30));
-                    var element = wait.Until(condition =>
+                    using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(30)))
                     {
-                        try
-                        {
-                            var elementToBeDisplayed = driver.FindElement(By.TagName("body"));
-                            return elementToBeDisplayed.Displayed;
-                        }
-                        catch (StaleElementReferenceException)
-                        {
-                            return false;
-                        }
-                        catch (NoSuchElementException)
-                        {
-                            return false;
-                        }
-                    });
+                        var chrome_options = new OpenQA.Selenium.Chrome.ChromeOptions();
+                        chrome_options.AddArgument("--headless"); //不展示浏览器页面
+                        chrome_options.AddArgument("--disable-gpu");
+                        chrome_options.AddArgument("--start-maximized");  // 最大化窗口
 
-                    var body = driver.FindElement(By.TagName("body"));
-                    long pageHeight = driver.Manage().Window.Size.Height;
-                    Console.WriteLine("init page heigh: " + pageHeight.ToString());
-                    var article_infos = new List<Dictionary<string, string>>();
-                    while(true)
-                    {
-                        // 滑动到底部，加载更多文章，直到无法加载更多为止
-                        //body.SendKeys(OpenQA.Selenium.Keys.Control + "End" + OpenQA.Selenium.Keys.Null);
-                        Actions actions = new Actions(driver);
-                        actions.KeyDown(OpenQA.Selenium.Keys.Control).SendKeys(OpenQA.Selenium.Keys.End).KeyUp(OpenQA.Selenium.Keys.Control).Perform();
-                        Thread.Sleep(4000);
-                        //int newHeight = driver.Manage().Window.Size.Height;
-                        IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-                        var newHeight = (long)js.ExecuteScript("return document.body.scrollHeight;");
-                        Console.WriteLine("new height: " + newHeight.ToString());
-                        Console.WriteLine("page height: " + pageHeight.ToString());
-                        if (newHeight == pageHeight)
-                        {
-                            Console.WriteLine("页面到达了底部");
-                            var title = driver.Title;
-                            var contents = driver.FindElements(By.CssSelector("article.blog-list-box"));
-                            // 获取所有文章链接信息
-                            for (int i = 0; i < contents.Count; i++) {
-                                var article_info = new Dictionary<string, string>();
-                                var link = contents[i].FindElement(By.TagName("a"));
-                                string href = link.GetAttribute("href");
-                                string post_time = link.FindElement(By.ClassName("view-time-box")).Text.Split(' ')[1];
-                                string article_title = link.FindElement(By.ClassName("blog-list-box-top")).Text;
-                                article_info["url"] = href;
-                                article_info["post_time"] = post_time;
-                                article_info["title"] = article_title;
+                        ChromeDriverService service = ChromeDriverService.CreateDefaultService();
+                        service.HideCommandPromptWindow = true; // 隐藏命令行窗口
+                        IWebDriver driver = new OpenQA.Selenium.Chrome.ChromeDriver(service, chrome_options);
+                        driver.Navigate().GoToUrl(csdn_url);
+                        // 加载页面
 
-                                article_infos.Add(article_info);
+                        var timeouts = driver.Manage().Timeouts();
+
+                        // 等待页面body标签加载完成
+                        var wait = new WebDriverWait(driver, new TimeSpan(0, 0, 30));
+                        var element = wait.Until(condition =>
+                        {
+                            try
+                            {
+                                var elementToBeDisplayed = driver.FindElement(By.TagName("body"));
+                                return elementToBeDisplayed.Displayed;
                             }
-                            break;
+                            catch (StaleElementReferenceException)
+                            {
+                                return false;
+                            }
+                            catch (NoSuchElementException)
+                            {
+                                return false;
+                            }
+                        });
+
+                        var body = driver.FindElement(By.TagName("body"));
+                        long pageHeight = driver.Manage().Window.Size.Height;
+                        Console.WriteLine("init page heigh: " + pageHeight.ToString());
+                        while (true)
+                        {
+                            // 滑动到底部，加载更多文章，直到无法加载更多为止
+                            //body.SendKeys(OpenQA.Selenium.Keys.Control + "End" + OpenQA.Selenium.Keys.Null);
+                            Actions actions = new Actions(driver);
+                            actions.KeyDown(OpenQA.Selenium.Keys.Control).SendKeys(OpenQA.Selenium.Keys.End).KeyUp(OpenQA.Selenium.Keys.Control).Perform();
+                            Thread.Sleep(4000);
+                            //int newHeight = driver.Manage().Window.Size.Height;
+                            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+                            var newHeight = (long)js.ExecuteScript("return document.body.scrollHeight;");
+                            Console.WriteLine("new height: " + newHeight.ToString());
+                            Console.WriteLine("page height: " + pageHeight.ToString());
+                            if (newHeight == pageHeight)
+                            {
+                                Console.WriteLine("页面到达了底部");
+                                var title = driver.Title;
+                                var contents = driver.FindElements(By.CssSelector("article.blog-list-box"));
+                                // 获取所有文章链接信息
+                                for (int i = 0; i < contents.Count; i++)
+                                {
+                                    var article_info = new Dictionary<string, string>();
+                                    var link = contents[i].FindElement(By.TagName("a"));
+                                    string href = link.GetAttribute("href");
+                                    string post_time = link.FindElement(By.ClassName("view-time-box")).Text.Split(' ')[1];
+                                    string article_title = link.FindElement(By.ClassName("blog-list-box-top")).Text;
+                                    article_info["url"] = href;
+                                    article_info["post_time"] = post_time;
+                                    article_info["title"] = article_title;
+
+                                    article_infos.Add(article_info);
+                                }
+                                break;
+                            }
+                            pageHeight = newHeight;
                         }
-                        pageHeight = newHeight;
+                        Console.WriteLine("文章列表：" + article_infos.ToList());
+
+                        // 退出浏览器
+                        driver.Quit();
+
+                        Thread.Sleep(1000);
                     }
-                    Console.WriteLine("文章列表：" + article_infos.ToList());
-
-                    // 退出浏览器
-                    driver.Quit();
-
-                    fillGridView(article_infos);
-                    Thread.Sleep(1000);
                 }
-            }
-            catch (TaskCanceledException ex)
-            {
-                MessageBox.Show($"{watch.Elapsed} s 任务超时");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"请求错误：{ex.ToString()}");
-            }
-            finally
-            {
-                if (waitDialog != null)
+                catch (TaskCanceledException ex)
                 {
-                    // 关闭【加载中】进度条
-                    waitDialog.Close();
+                    MessageBox.Show($"{watch.Elapsed} s 任务超时");
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"请求错误：{ex.ToString()}");
+                }
+            });
+
+            if (waitDialog != null)
+            {
+                // 关闭【加载中】进度条
+                waitDialog.Close();
             }
+
+            fillGridView(article_infos);
+
         }
 
         private Dictionary<string, string> RequestArticleContent(string article_url)
@@ -507,11 +514,14 @@ namespace csdn_download
                 using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(30)))
                 {
                     var chrome_options = new OpenQA.Selenium.Chrome.ChromeOptions();
-                    //chrome_options.AddArgument("--headless");
+                    chrome_options.AddArgument("--headless"); // 不展示浏览器页面
                     chrome_options.AddArgument("--disable-gpu");
                     chrome_options.AddArgument("--start-maximized");  // 最大化窗口
                     chrome_options.PageLoadStrategy = PageLoadStrategy.Eager;
-                    IWebDriver driver = new OpenQA.Selenium.Chrome.ChromeDriver(chrome_options);
+
+                    ChromeDriverService service = ChromeDriverService.CreateDefaultService();
+                    service.HideCommandPromptWindow = true; // 隐藏命令行窗口
+                    IWebDriver driver = new OpenQA.Selenium.Chrome.ChromeDriver(service, chrome_options);
                     driver.Navigate().GoToUrl(article_url);
                     // 加载页面
 

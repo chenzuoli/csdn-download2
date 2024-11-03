@@ -1,6 +1,6 @@
 # csdn文章导出
 
-依赖包：
+依赖包，无需用户安装，只是列在此处，供二次开发者查看：
 
 1. packages/HtmlAgilityPack.1.11.70
 2. packages/Microsoft.Bcl.AsyncInterfaces.8.0.0
@@ -18,10 +18,12 @@
 14. packages/System.ValueTuple.4.5.
 
 # 使用
-1. 进入csdn-download/bin/Debug，点击csdn-download.exe
-2. 或者安装到计算机：进入Setup1/Debug，点击setup.exe
+1. 用户电脑必须安装google chrome浏览器
+2. 进入csdn-download/bin/Debug，点击csdn-download.exe
+3. 或者安装到计算机：进入Setup1/Debug，点击setup.exe
 
 
+---
 
 祝导出愉快。
 
