@@ -55,3 +55,5 @@ E:\VisualStudioProjects\csdn-download2\csdn-download\bin\Debug\ReverseMarkdown.d
 E:\VisualStudioProjects\csdn-download2\csdn-download\bin\Debug\HtmlAgilityPack.pdb
 E:\VisualStudioProjects\csdn-download2\csdn-download\bin\Debug\HtmlAgilityPack.xml
 E:\VisualStudioProjects\csdn-download2\csdn-download\obj\Debug\csdn_download.csdn_export.resources
+E:\VisualStudioProjects\csdn-download2\csdn-download\obj\Debug\csdn_download.CnblogForm.resources
+E:\VisualStudioProjects\csdn-download2\csdn-download\obj\Debug\csdn_download.CsdnForm.resources
