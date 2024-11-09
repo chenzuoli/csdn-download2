@@ -17,6 +17,12 @@
 13. packages/System.Threading.Tasks.Extensions.4.5.4
 14. packages/System.ValueTuple.4.5.
 
+
+# cnblogs博客园导入
+选择本地markdown文章，批量导入
+需提前浏览器登录cnblogs网站，并获取登录cookie和导入文章token。
+
+
 # 使用
 1. 用户电脑必须安装google chrome浏览器
 2. 进入csdn-download/bin/Debug，点击csdn-download.exe
