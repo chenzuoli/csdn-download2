@@ -69,10 +69,6 @@ namespace csdn_download
             form.MaximizeBox = false;
             form.FormBorderStyle = FormBorderStyle.None;
             openPage(form);
-
-            // 导入博客园
-            string cnblog_url = "https://i.cnblogs.com/api/posts";
-
         }
 
         private void MainForm_Load(object sender, EventArgs e)

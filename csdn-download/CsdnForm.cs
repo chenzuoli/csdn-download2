@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using WinFormWaitDialog;
 using ReverseMarkdown;
+using csdn_download.util;
 
 namespace csdn_download
 {
@@ -183,7 +184,7 @@ namespace csdn_download
             }
 
             // 提示导出成功
-            ShowMessageBoxWithTimeout("导出成功！", 3000);
+            CommonUtil.ShowMessageBoxWithTimeout("导出成功！", 3000);
         }
 
         private string parseTitle(string title)
@@ -591,43 +592,6 @@ namespace csdn_download
             return data;
         }
 
-        private void ShowMessageBoxWithTimeout(string message, int timeout)
-        {
-            // 创建提示框
-            Form messageBoxForm = new Form()
-            {
-                Width = 300,
-                Height = 150,
-                FormBorderStyle = FormBorderStyle.FixedDialog,
-                Text = "提示",
-                StartPosition = FormStartPosition.CenterScreen
-            };
-
-            Label messageLabel = new Label()
-            {
-                TextAlign = ContentAlignment.MiddleCenter,
-                AutoSize = true,
-                Text = message,
-                Left = 50,
-                Top = 50
-            };
-            messageBoxForm.Controls.Add(messageLabel);
-
-            // 显示提示框
-            messageBoxForm.Show();
-
-            // 设置定时器关闭提示框
-            System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer()
-            {
-                Interval = timeout
-            };
-            timer.Tick += (sender, e) =>
-            {
-                timer.Stop();
-                messageBoxForm.Close();
-            };
-            timer.Start();
-        }
 
     }
 }
