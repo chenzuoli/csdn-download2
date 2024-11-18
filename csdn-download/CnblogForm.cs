@@ -169,7 +169,7 @@ namespace csdn_download
 
         private async void LongRunningProcess(IProgress<string> progress)
         {
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 10000; i++)
             {
                 progress.Report($"cnblogs uploading...");
                 Thread.Sleep(10000);
@@ -331,7 +331,7 @@ namespace csdn_download
             }
 
             HttpClient client = new HttpClient();
-            client.Timeout = TimeSpan.FromMinutes(35);
+            client.Timeout = TimeSpan.FromMinutes(1440);
 
             // http请求超时时间10min
             var watch = Stopwatch.StartNew();
@@ -380,7 +380,7 @@ namespace csdn_download
 
                     try
                     {
-                        using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(30)))
+                        using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1440)))
                         {
                             //var postContent = new FormUrlEncodedContent(new[]
                             //{

@@ -90,13 +90,13 @@ namespace csdn_download
             waitDialog.Show();
 
             HttpClient client = new HttpClient();
-            client.Timeout = TimeSpan.FromMinutes(35);
+            client.Timeout = TimeSpan.FromMinutes(1440);
 
             // http请求超时时间10min
             var watch = Stopwatch.StartNew();
             try
             {
-                using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(30)))
+                using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1440)))
                 {
                     for (int i = 0; i < article_urls.Count; i++)
                     {
@@ -150,20 +150,29 @@ namespace csdn_download
             await Task.Run(() =>
             {
                 HttpClient client = new HttpClient();
-                client.Timeout = TimeSpan.FromMinutes(35);
+                client.Timeout = TimeSpan.FromMinutes(1440);
 
                 // http请求超时时间10min
                 var watch = Stopwatch.StartNew();
                 try
                 {
-                    using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(30)))
+                    using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1440)))
                     {
                         for (int i = 0; i < article_urls.Count; i++)
                         {
-                            string article_url = article_urls[i];
-                            var article_info = RequestArticleContent(article_url);
-                            write_markdown(selectedFolder, article_info);
-                            Thread.Sleep(1000);
+                            try
+                            {
+                                string article_url = article_urls[i];
+                                var article_info = RequestArticleContent(article_url);
+                                write_markdown(selectedFolder, article_info);
+                                Thread.Sleep(1000);
+                                CommonUtil.ShowMessageBoxWithTimeout($"{article_info["title"]} 导出成功！", 3000);
+                            }
+                            catch (Exception ex)
+                            {
+                                CommonUtil.ShowMessageBoxWithTimeout($"{article_urls[i]} 导出失败！", 3000);
+                            }
+
                         }
                     }
                 }
@@ -229,13 +238,13 @@ namespace csdn_download
 
             string csdn_url = "http://localhost:5000/csdn/get_articles/" + user_id;
             HttpClient client = new HttpClient();
-            client.Timeout = TimeSpan.FromMinutes(35);
+            client.Timeout = TimeSpan.FromMinutes(1440);
 
             // http请求超时时间10min
             var watch = Stopwatch.StartNew();
             try
             {
-                using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(30)))
+                using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1440)))
                 {
                     HttpResponseMessage response = await client.GetAsync(csdn_url, tokenSource.Token);
                     if (response.IsSuccessStatusCode)
@@ -275,7 +284,7 @@ namespace csdn_download
 
         private async void LongRunningProcess(IProgress<string> progress)
         {
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 10000; i++)
             {
                 progress.Report($"csdn downloading...");
                 Thread.Sleep(10000);
@@ -395,13 +404,13 @@ namespace csdn_download
             {
                 string csdn_url = "https://blog.csdn.net/" + user_id;
                 HttpClient client = new HttpClient();
-                client.Timeout = TimeSpan.FromMinutes(35);
+                client.Timeout = TimeSpan.FromMinutes(1440);
 
                 // http请求超时时间10min
                 var watch = Stopwatch.StartNew();
                 try
                 {
-                    using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(30)))
+                    using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1440)))
                     {
                         var chrome_options = new OpenQA.Selenium.Chrome.ChromeOptions();
                         chrome_options.AddArgument("--headless"); //不展示浏览器页面
@@ -506,13 +515,13 @@ namespace csdn_download
             string content = "";
             string title = "";
             HttpClient client = new HttpClient();
-            client.Timeout = TimeSpan.FromMinutes(35);
+            client.Timeout = TimeSpan.FromMinutes(1440);
 
             // http请求超时时间10min
             var watch = Stopwatch.StartNew();
             try
             {
-                using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(30)))
+                using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1440)))
                 {
                     var chrome_options = new OpenQA.Selenium.Chrome.ChromeOptions();
                     chrome_options.AddArgument("--headless"); // 不展示浏览器页面
