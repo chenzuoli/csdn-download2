@@ -81,5 +81,10 @@ namespace csdn_download
             form.FormBorderStyle = FormBorderStyle.None;
             openPage(form);
         }
+
+        private void splitContainer1_Panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }

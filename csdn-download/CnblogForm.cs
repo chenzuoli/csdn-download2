@@ -315,7 +315,7 @@ namespace csdn_download
 
         private async void postCnblogs(List<string> filePaths, WaitDialog waitDialog)
         {
-            string cnblogs_url = "http://localhost:5000/public/import_cnblogs";
+            string cnblogs_url = "https://lezhifu.cc/admin/import_cnblogs";
             // 导入，请求博客园导入接口
             string cookie = cnblog_cookie_input.Text;
             string token = cnblog_token.Text;

@@ -55,15 +55,17 @@
             // 
             // splitContainer1
             // 
-            this.splitContainer1.Location = new System.Drawing.Point(1, 24);
+            this.splitContainer1.Location = new System.Drawing.Point(1, 1);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.BackColor = System.Drawing.SystemColors.ControlLight;
             this.splitContainer1.Panel1.Controls.Add(this.cnblog_category);
             this.splitContainer1.Panel1.Controls.Add(this.csdn_category);
-            this.splitContainer1.Size = new System.Drawing.Size(1239, 634);
-            this.splitContainer1.SplitterDistance = 167;
+            this.splitContainer1.Panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer1_Panel1_Paint);
+            this.splitContainer1.Size = new System.Drawing.Size(1195, 684);
+            this.splitContainer1.SplitterDistance = 161;
             this.splitContainer1.TabIndex = 20;
             // 
             // cnblog_category
