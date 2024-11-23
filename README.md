@@ -15,12 +15,25 @@
 11. packages/System.Text.Encodings.Web.8.0.0
 12. packages/System.Text.Json.8.0.4
 13. packages/System.Threading.Tasks.Extensions.4.5.4
-14. packages/System.ValueTuple.4.5.
+14. packages/System.ValueTuple.4.5
 
+## 导出步骤
+1. 填写导出账号
+2. 选择导出的文章
+3. 导出
+
+
+图片去水印依赖包：
+1. OpenCvSharp4
+2. OpenCvSharp4.runtime.<os>，如果是win则安装OpenCvSharp4.runtime.win，如果是ubuntu，则安装OpenCvSharp4.runtime.ubuntu或OpenCvSharp4.runtime.linux
+
+图片已去CSDN水印，并保存在markdown文件同名文件夹中。
 
 # cnblogs博客园导入
 选择本地markdown文章，批量导入
-需提前浏览器登录cnblogs网站，并获取登录cookie和导入文章token。
+1. 需提前浏览器登录cnblogs网站，并获取登录cookie和导入文章token；
+2. 图片导入cnblogs获取图片在cnblogs网站的地址；
+3. 上传markdown文件，替换文件中的图片地址为第二步获取的图片地址；
 
 
 # 使用

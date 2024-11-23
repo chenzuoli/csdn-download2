@@ -43,3 +43,9 @@ E:\VisualStudioProjects\csdn-download2\csdn-download\obj\Debug\BlogOp.csproj.Cor
 E:\VisualStudioProjects\csdn-download2\csdn-download\obj\Debug\BlogOp.csproj.Up2Date
 E:\VisualStudioProjects\csdn-download2\csdn-download\obj\Debug\csdn-download.exe
 E:\VisualStudioProjects\csdn-download2\csdn-download\obj\Debug\csdn-download.pdb
+E:\VisualStudioProjects\csdn-download2\csdn-download\bin\Debug\OpenCvSharp.dll
+E:\VisualStudioProjects\csdn-download2\csdn-download\bin\Debug\OpenCvSharp.xml
+E:\VisualStudioProjects\csdn-download2\csdn-download\bin\Debug\dll\x86\OpenCvSharpExtern.dll
+E:\VisualStudioProjects\csdn-download2\csdn-download\bin\Debug\dll\x86\opencv_videoio_ffmpeg4100.dll
+E:\VisualStudioProjects\csdn-download2\csdn-download\bin\Debug\dll\x64\OpenCvSharpExtern.dll
+E:\VisualStudioProjects\csdn-download2\csdn-download\bin\Debug\dll\x64\opencv_videoio_ffmpeg4100_64.dll

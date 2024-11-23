@@ -170,18 +170,20 @@ namespace csdn_download
                             }
                             catch (Exception ex)
                             {
+                                Console.WriteLine(ex.StackTrace);
                                 CommonUtil.ShowMessageBoxWithTimeout($"{article_urls[i]} 导出失败！", 3000);
                             }
-
                         }
                     }
                 }
                 catch (TaskCanceledException ex)
                 {
+                    Console.WriteLine(ex.StackTrace);
                     MessageBox.Show($"{watch.Elapsed} s 任务超时");
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.StackTrace);
                     MessageBox.Show($"请求错误：{ex.ToString()}");
                 }
             });
@@ -193,25 +195,47 @@ namespace csdn_download
             }
 
             // 提示导出成功
-            CommonUtil.ShowMessageBoxWithTimeout("导出成功！", 3000);
+            // CommonUtil.ShowMessageBoxWithTimeout("导出成功！", 3000);
         }
 
-        private string parseTitle(string title)
-        {
-            title = title.Trim();
-            title = title.Replace(" ", "_").Replace("\\", "_").Replace("/", "_").Replace(":", "_").Replace("*", "_").Replace("?", "_");
-            title = title.Replace("'", "_").Replace("\"", "_").Replace(">", "_").Replace("<", "_").Replace("|", "_").Replace("\0", "_");
-            title = title.Replace("\r", "_").Replace("\n", "_").Replace("[", "_").Replace("]", "_");
-            return title;
-        }
 
         private void write_markdown(string selectedFolder, Dictionary<string, string> article_info)
         {
             // 写markdown文件
             string content = article_info["content"];
             string title = article_info["title"].Replace("-CSDN博客", "");
-            title = parseTitle(title);
-            File.WriteAllText(Path.Combine(selectedFolder, title + ".md"), content);
+            title = DownloadUtil.parseTitle(title);
+            //File.WriteAllText(Path.Combine(selectedFolder, title + ".md"), content);
+
+            // 下载image文件，写入markdown文件
+            string absFilePath = Path.Combine(selectedFolder, title + ".md");
+            Console.WriteLine("abs file path: " + absFilePath);
+            if (System.IO.File.Exists(absFilePath))
+            {
+                System.IO.File.Delete(absFilePath);
+            }
+            using (StreamWriter writer = new StreamWriter(absFilePath))
+            {
+                foreach(string line in content.Split('\n'))
+                {
+                    Console.WriteLine("line: " + line);
+                    if (line.Contains("https://i-blog.csdnimg.cn/"))
+                    {
+                        string imgUrl = DownloadUtil.getImgUrl(line);
+                        string imgName = System.IO.Path.GetFileName(imgUrl);
+
+                        if (imgUrl != null)
+                        {
+                            DownloadUtil.downloadFile(title, selectedFolder, imgUrl);
+                            Console.WriteLine("download img file: " + imgUrl);
+                        }
+                        writer.WriteLine("![img](" + title + "/" + imgName + ")");
+                    } else
+                    {
+                        writer.WriteLine(line);
+                    }
+                }
+            }
         }
 
         private void viewBlogBtn_Click(object sender, EventArgs e)
@@ -563,6 +587,12 @@ namespace csdn_download
                     var doc = new HtmlAgilityPack.HtmlDocument();
                     doc.LoadHtml(html);
                     title = doc.DocumentNode.SelectSingleNode("//title").InnerText;
+                    // 移除title中的特殊字符，避免无法创建文件
+                    string invalid = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+                    foreach (char c in invalid)
+                    {
+                        title = title.Replace(c.ToString(), "");
+                    }
 
                     // markdown the content
                     HtmlNode htmlNode = doc.DocumentNode.SelectSingleNode("//div[@id='content_views']");
@@ -580,7 +610,7 @@ namespace csdn_download
                     }
                     var converter = new Converter();
                     content = converter.Convert(htmlNode.InnerHtml);
-                    Console.WriteLine(content);
+                    // Console.WriteLine(content);
                     // 退出浏览器
                     driver.Quit();
 
