@@ -316,6 +316,7 @@ namespace csdn_download
         private async void postCnblogs(List<string> filePaths, WaitDialog waitDialog)
         {
             string cnblogs_url = "https://lezhifu.cc/admin/import_cnblogs";
+            // string cnblogs_url = "http://localhost:5000/admin/import_cnblogs";
             // 导入，请求博客园导入接口
             string cookie = cnblog_cookie_input.Text;
             string token = cnblog_token.Text;
@@ -340,26 +341,14 @@ namespace csdn_download
             {
                 using (StreamReader sr = new StreamReader(path))
                 {
+                    string selectedFolder = Path.GetDirectoryName(path);
                     string title = Path.GetFileName(path);
                     string article_content = sr.ReadToEnd();
 
-                    //string jsonData = JsonSerializer.Serialize(new
-                    //{
-                    //    postType = 1,
-                    //    accessPermission = 0,
-                    //    title = title,
-                    //    postBody = article_content,
-                    //    categories = new List<string>() { category },
-                    //    inSiteCandidate = false,
-                    //    inSiteHome = false,
-                    //    isPublished = false,
-                    //    isAllowComments = true,
-                    //    description = desc,
-                    //    tags = new List<string>() { tag },
-                    //    isMarkdown = true,
-                    //    isDraft = isDraft
-                    //    // 添加你的JSON属性
-                    //});
+                    // markdown内容中的图片处理，将图片先存放到cnblog中，获取图片在cnblog网站的链接
+                    article_content =  await uploadImageToCnblogs(selectedFolder, article_content, waitDialog);
+                    Console.WriteLine($"{title} {article_content}");
+
                     var jsonData = new Dictionary<string, object>
                     {
                         {"postType", 1},
@@ -382,12 +371,6 @@ namespace csdn_download
                     {
                         using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1440)))
                         {
-                            //var postContent = new FormUrlEncodedContent(new[]
-                            //{
-                            //    new KeyValuePair<string, string>("token", token),
-                            //    new KeyValuePair<string, string>("cookie", cookie),
-                            //    new KeyValuePair<string, string>("data", jsonData)
-                            //});
                             var postContent = new Dictionary<string, object>
                             {
                                 {"token", token},
@@ -402,10 +385,13 @@ namespace csdn_download
                             {
                                 string content = await response.Content.ReadAsStringAsync();
                                 Console.WriteLine(content);
+                                // 提示导出成功
+                                CommonUtil.ShowMessageBoxWithTimeout($"{title}导入成功！", 3000);
                             }
                             else
                             {
                                 Console.WriteLine($"Error: {response.StatusCode}, cnblog upload url: {cnblogs_url}");
+                                MessageBox.Show($"Error: {response.StatusCode}, 请确认输入的token和cookie信息。");
                             }
                         }
                     }
@@ -420,8 +406,6 @@ namespace csdn_download
                     finally
                     {
                         Console.WriteLine($"{title} 导入完成。");
-                        // 提示导出成功
-                        CommonUtil.ShowMessageBoxWithTimeout($"{title}导入成功！", 3000);
                     }
                 }
             }
@@ -430,6 +414,82 @@ namespace csdn_download
                 // 关闭【加载中】进度条
                 waitDialog.Close();
             }
+        }
+
+        private async Task<string> uploadImageToCnblogs(string selectedFolder, string content, WaitDialog waitDialog)
+        {
+            HttpClient client = new HttpClient();
+            client.Timeout = TimeSpan.FromMinutes(1440);
+
+            // http请求超时时间10min
+            var watch = Stopwatch.StartNew();
+
+            List<string> file_content = new List<string>();
+            foreach (var line in content.Split('\n'))
+            {
+                if (line.Contains("![img]("))
+                {
+                    Console.WriteLine($"Uploading image to cnblogs");
+
+                    // upload cnblogs
+                    // string upload_cnblog_url = "http://localhost:5000/admin/image_import_cnblogs";
+                    string upload_cnblog_url = "https://lezhifu.cc/admin/image_import_cnblogs";
+                    string cookie = cnblog_cookie_input.Text;
+                    string token = cnblog_token.Text;
+
+                    string img_relative_path = line.Replace("![img](", "").Replace(")", "").Replace("\r", "").Replace("\n", "");
+                    Console.WriteLine(img_relative_path);
+                    string fileName = Path.GetFileName(img_relative_path);
+                    using (var img_content = new MultipartFormDataContent())
+                    using (var fileStream = File.OpenRead(Path.Combine(selectedFolder, img_relative_path)))
+                    {
+                        var fileContent = new StreamContent(fileStream);
+                        fileContent.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data")
+                        {
+                            Name = "imageFile", // 这里的name需要和Flask端接收文件的字段名一致
+                            FileName = fileName
+                        };
+
+                        // 添加图片文件内容
+                        img_content.Add(fileContent);
+
+                        // 添加其他参数
+                        img_content.Add(new StringContent(token), "token"); // 这里的paramName需要和Flask端接收参数的字段名一致
+                        img_content.Add(new StringContent(cookie), "cookie");
+
+                        try
+                        {
+                            var response = await client.PostAsync(upload_cnblog_url, img_content);
+                            response.EnsureSuccessStatusCode();
+                            if (response.IsSuccessStatusCode)
+                            {
+                                string resp_text = await response.Content.ReadAsStringAsync();
+                                file_content.Add("![img](" + resp_text + ")");
+                                Console.WriteLine(resp_text);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Error: {response.StatusCode}, cnblog upload url: {upload_cnblog_url}");
+                            }
+                        }
+                        catch (TaskCanceledException ex)
+                        {
+                            MessageBox.Show($"{watch.Elapsed} s 任务超时");
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"请求错误：{ex.ToString()}");
+                        }
+                    }
+                    
+                    Console.WriteLine("Upload images to cnblogs done.");
+                }
+                else
+                {
+                    file_content.Add(line);
+                }
+            }
+            return String.Join("\r\n", file_content);
         }
     }
 }

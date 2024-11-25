@@ -78,7 +78,6 @@ namespace csdn_download
 
             // 爬取文章并导出
             get_article_contents(selectedFolder, selectedUrls);
-
         }
 
         private async void get_articles(string selectedFolder, List<string> article_urls)
@@ -218,7 +217,7 @@ namespace csdn_download
             {
                 foreach(string line in content.Split('\n'))
                 {
-                    Console.WriteLine("line: " + line);
+                    // Console.WriteLine("line: " + line);
                     if (line.Contains("https://i-blog.csdnimg.cn/"))
                     {
                         string imgUrl = DownloadUtil.getImgUrl(line);
@@ -226,8 +225,8 @@ namespace csdn_download
 
                         if (imgUrl != null)
                         {
-                            DownloadUtil.downloadFile(title, selectedFolder, imgUrl);
                             Console.WriteLine("download img file: " + imgUrl);
+                            DownloadUtil.downloadFile(title, selectedFolder, imgUrl);
                         }
                         writer.WriteLine("![img](" + title + "/" + imgName + ")");
                     } else

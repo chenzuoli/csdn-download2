@@ -91,7 +91,7 @@
             // 
             // cnblogImportBtn
             // 
-            this.cnblogImportBtn.Location = new System.Drawing.Point(919, 390);
+            this.cnblogImportBtn.Location = new System.Drawing.Point(806, 387);
             this.cnblogImportBtn.Name = "cnblogImportBtn";
             this.cnblogImportBtn.Size = new System.Drawing.Size(75, 23);
             this.cnblogImportBtn.TabIndex = 23;

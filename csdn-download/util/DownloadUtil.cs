@@ -59,7 +59,7 @@ namespace csdn_download.util
                 //  if (Debugger.IsAttached)
                 //      Window.ShowImages(src, mask, dst);
                 Cv2.ImWrite(filePath, dst);
-                Console.WriteLine("inpainted new image.");
+                Console.WriteLine("remove watermark success.");
             }
             catch (Exception ex)
             {
