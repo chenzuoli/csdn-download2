@@ -17,8 +17,13 @@
 13. packages/System.Threading.Tasks.Extensions.4.5.4
 14. packages/System.ValueTuple.4.5
 
+## 查看博客
+![view](images/view.png)
+
+
 ## 导出步骤
 1. 填写导出账号
+![account](images/account.png)
 2. 选择导出的文章
 3. 导出
 
@@ -31,10 +36,16 @@
 
 # cnblogs博客园导入
 选择本地markdown文章，批量导入
+![import_cnblogs](images/import_cnblogs.png)
 1. 需提前浏览器登录cnblogs网站，并获取登录cookie和导入文章token；
+![cookie](images/cookie.png)
+![token](images/token.png)
 2. 图片导入cnblogs获取图片在cnblogs网站的地址；
 3. 上传markdown文件，替换文件中的图片地址为第二步获取的图片地址；
-
+4. 填写参数
+![params](images/params.png)
+5. 导入成功
+![success](images/success.png)
 
 # 使用
 1. 用户电脑必须安装google chrome浏览器
@@ -60,5 +71,5 @@
 
 公众号：
 <div style="text-align: center;">  
-    <img src="image.png" alt="乐知付" style="width: 50%;">  
+    <img src="images/image.png" alt="乐知付" style="width: 50%;">  
 </div>
